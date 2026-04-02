@@ -19,7 +19,8 @@ return new class extends Migration
             $table->foreign('project_id')->references('id')->on('projects')->onDelete('set null');
             $table->unsignedBigInteger('user_id')->nullable();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
-            $table->string('role_in_project')->nullable();
+            $table->unsignedBigInteger('project_role_id')->nullable();
+            $table->foreign('project_role_id')->references('id')->on('project_roles')->onDelete('set null');
             $table->timestamps();
         });
     }

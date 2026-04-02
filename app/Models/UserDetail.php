@@ -8,4 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 class UserDetail extends Model
 {
     use HasFactory;
+    protected $fillable = [
+        'user_id',
+        'company_name',
+        'company_contact',
+        'company_address'
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

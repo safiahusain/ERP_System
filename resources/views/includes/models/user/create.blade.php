@@ -1,5 +1,7 @@
-<div class="modal" tabindex="-1" id="create_modal" role="dialog" aria-labelledby="pendingTransactionModalLabel"
-    aria-hidden="true">
+@php
+    $my_array   =   ['name', 'email', 'contact', 'password', 'address'];
+@endphp
+<div class="modal fade" id="create-user-modal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -9,7 +11,7 @@
             </div>
             <div class="card">
                 <div class="card-body">
-                    <form action="" method="post" id="create_user_form">
+                    <form method="post" id="create_user_form" class="create_form" data-target="{{$target}}" data-array='@json($my_array)'>
                         @csrf
                         <div class="row">
 
@@ -22,32 +24,22 @@
                             <div class="col-md-6 col-12">
                                 <div class="form-group">
                                     <label>{{ __('Role') }}</label>
-                                    <select class='form-control select2' name='role' onchange="show_fields(this)" style="width: 100%">
+                                    <select class='form-control select2' name='role' onchange="show_fields(this, 'create')" style="width: 100%">
                                         <option disabled selected>{{ __('Select User') }}</option>
-                                        @foreach (config('defaults.roles') as $key => $role)
-                                            <option value="{{ $key }}">{{ $role }}</option>
+                                        @foreach ($roles as $key => $role)
+                                            @if ($role['tag'] != "super_admin")
+                                                <option value="{{ $role['tag'] }}">{{ $role['name'] }}</option>
+                                            @endif
                                         @endforeach
                                     </select>
                                     <small class="text-danger" id="create_role"></small>
                                 </div>
                             </div>
-
-                            <!-- Hidden Fields -->
-                            <div id="show_hidden_fields" class="d-none">
-                                <div class="row">
-                                    @include('includes.models.create-field', [
-                                        'fields' => ['company_name', 'company_contact', 'company_address'],
-                                        'col' => 'col-md-6 col-12',
-                                        'target' => 'create'
-                                    ])
-                                </div>
-                            </div>
-
                         </div>
                         <hr>
                         <div class="float-right">
                             <button class="btn-modern btn-danger">{{ __('Cancel') }}</button>
-                            <button type="submit" id="create_user_btn" class="btn-modern btn-success">{{ __('Submit') }}</button>
+                            <button type="submit" id="create_user_btn" data-route="{{ route('user-create') }}" class="btn-modern btn-success">{{ __('Submit') }}</button>
                         </div>
                     </form>
                 </div>

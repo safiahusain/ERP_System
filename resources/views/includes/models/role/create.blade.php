@@ -1,4 +1,7 @@
-<div class="modal" tabindex="-1" id="create_modal" role="dialog" aria-labelledby="pendingTransactionModalLabel"
+@php
+    $my_array   =   ['name', 'tag', 'linked_role'];
+@endphp
+<div class="modal" tabindex="-1" id="create-role-modal" role="dialog" aria-labelledby="pendingTransactionModalLabel"
     aria-hidden="true">
     <div class="modal-dialog modal-md" role="document">
         <div class="modal-content">
@@ -9,17 +12,33 @@
             </div>
             <div class="card">
                 <div class="card-body">
-                    <form action="" method="post" id="create_role_form">
+                    <form method="post" id="create_role_form" class="create_form" data-target="{{$target}}" data-array='@json($my_array)'>
                         @csrf
                         @include('includes.models.create-field', [
                             'fields' => ['name', 'tag'],
                             'col' => 'col-md-12 col-12',
                             'target' => 'create'
                         ])
+
+                        <div class="col-md-12 col-12">
+                            <div class="form-group">
+                                <label>{{ __('Role') }}</label>
+                                <select class='form-control select2' name='linked_role' style="width: 100%">
+                                    <option disabled selected>{{ __('Select User') }}</option>
+                                    @foreach (config('defaults.roles') as $key => $role)
+                                        @if ($key != "super_admin")
+                                            <option value="{{ $key }}">{{ $role }}</option>
+                                        @endif
+                                    @endforeach
+                                </select>
+                                <small class="text-danger" id="create_linked_role"></small>
+                            </div>
+                        </div>
+
                         <hr>
                         <div class="float-right">
                             <button class="btn-modern btn-danger" data-dismiss="modal">{{ __('Cancel') }}</button>
-                            <button type="submit" id="create_role_btn" class="btn-modern btn-success">{{ __('Submit') }}</button>
+                            <button type="submit" id="create_role_btn" data-route="{{ route('role-create') }}" class="btn-modern btn-success">{{ __('Submit') }}</button>
                         </div>
                     </form>
                 </div>

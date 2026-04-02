@@ -15,16 +15,38 @@
                 <tr>
                     <td> {{ ucwords($user->name) ??  "" }} </td>
                     <td> {{ $user->email ??  "" }} </td>
-                    <td> {{ $user->roles    ?   ucwords($user->roles->name)   : '' }} </td>
-                    <td> {{ $user->contact ??  "" }} </td>
+                    <td> {{ $user->role    ?   ucwords($user->role->name)   : '' }} </td>
+                    <td> {{ $user->phone ??  "" }} </td>
                     <td> {{ $user->address ??  "" }} </td>
                     <td>
-                        <a href="javascript:void(0)" data-bs-toggle="tooltip" title="{{ __('Download') }}">
-                            <img src="{{asset('images/icons/edit.png')}}" class="filters-btn">
-                        </a>
-                        <a href="javascript:void(0)" data-bs-toggle="tooltip" title="{{ __('Download') }}">
-                            <img src="{{asset('images/icons/delete.png')}}" class="filters-btn">
-                        </a>
+                        @if (array_key_exists("USERACTTOGGLE",$auth->func) || $auth->role == "super_admin")
+                            <label class="ios-switch">
+                                <input type="checkbox"
+                                    user_id="{{$user->id}}"
+                                    @if($user->status) checked @endif
+                                    onchange="set_active_toggle(this)">
+                                <span class="ios-slider"></span>
+                            </label>
+                        @else
+                            {{$asset->main ? __('data.yes') : __('data.no')}}
+                        @endif
+                    </td>
+                    <td>
+                        @if (array_key_exists("USERCRT",$auth->func))
+                            <a href="javascript:void(0)" onclick="assign_to_update(this, {{$user}})" data-bs-toggle="tooltip" title="{{ __('Update') }}">
+                                <img src="{{asset('images/icons/edit.png')}}" class="filters-btn">
+                            </a>
+                        @endif
+                        @if (array_key_exists("USERCRT",$auth->func))
+                            <a href="javascript:void(0)" data-bs-toggle="tooltip" onclick="set_delete_recode_id({{$user->id}}, 'user')" title="{{ __('Delete') }}">
+                                <img src="{{asset('images/icons/delete.png')}}" class="filters-btn">
+                            </a>
+                        @endif
+                        @if((array_key_exists("USERCRT",$auth->func) || $auth->role == "super_admin") && ($user->isTeamMemberType() || $user->isManagerType()))
+                            <a href="javascript:void(0)" onclick="showUserAssignments(this, {{$user}})" data-bs-toggle="tooltip" title="{{ __('Update') }}">
+                                <img src="{{asset('images/icons/assign_leader.png')}}" class="filters-btn">
+                            </a>
+                        @endif
                     </td>
                 </tr>
             @endforeach
