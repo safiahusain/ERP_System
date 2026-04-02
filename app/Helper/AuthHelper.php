@@ -21,11 +21,10 @@ class AuthHelper
         if ($user)
         {
             $data->user =   $user;
-            $data->role =   $user->roles['name'];
-            $func       =   $user->roles->functionalities()->where(['status' => 1])->get();
-            // $func       =   $user->roles['slug'] = "admin"
-            //                 ?   functionality::where(['target'=> 'action', 'status' => 1])->get()
-            //                 :   $user->roles->functionalities()->where(['target'=> 'action', 'status' => 1])->get();
+            $data->role =   $user->role['tag'];
+            $func       =   $user->role['tag'] == "super_admin"
+                            ?   functionality::where(['target'=> 'action', 'status' => 1])->get()
+                            :   $user->role->functionalities()->where(['target'=> 'action', 'status' => 1])->get();
 
             $data->func     =   $func
                                 ->mapWithKeys(function ($item)
@@ -56,22 +55,14 @@ class AuthHelper
         if ($user)
         {
             $data->user = $user;
-
-            // $menu       =   in_array($user->roles['name'], ["Admin", "admin"])
-            //                 ?   Functionality::where('target', 'menu')
-            //                     ->whereNull('parent_id')
-            //                     ->where('status', 1)
-            //                     ->with('children')
-            //                     ->orderBy('order')
-            //                     ->get()
-            //                 :   $user->roles->functionalities()
-            //                     ->where('target', 'menu')
-            //                     ->whereNull('parent_id')
-            //                     ->where('status', 1)
-            //                     ->with('children')
-            //                     ->orderBy('order')
-            //                     ->get();
-            $menu       =   $user->roles->functionalities()
+            $menu       =   $user->role['tag'] == "super_admin"
+                            ?   Functionality::where('target', 'menu')
+                                ->whereNull('parent_id')
+                                ->where('status', 1)
+                                ->with('children')
+                                ->orderBy('order')
+                                ->get()
+                            :   $user->role->functionalities()
                                 ->where('target', 'menu')
                                 ->whereNull('parent_id')
                                 ->where('status', 1)

@@ -224,6 +224,71 @@
             overflow: hidden !important;
         }
 
+        /* pagination  */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px 0;
+            list-style: none;
+        }
+
+        /* Lock Size Completely */
+        .page-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #374151;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            box-sizing: border-box; /* VERY IMPORTANT */
+        }
+
+        /* Hover */
+        .page-link:hover {
+            background: #eef2ff;
+            color: #2563eb;
+            border: 1px solid #c7d2fe; /* border remove mat karein */
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+        }
+
+        /* Active */
+        .page-item.active .page-link {
+            background: #2563eb;
+            color: #ffffff;
+            border: 1px solid #2563eb; /* border remove na karein */
+            box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+        }
+
+        /* Disabled */
+        .page-item.disabled .page-link {
+            background: #f3f4f6;
+            color: #cbd5e1;
+            border: 1px solid #e5e7eb;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        /* FIX IMAGE RESIZE ISSUE */
+        .page-link img {
+            width: 18px;
+            height: 18px;
+            min-width: 18px;
+            min-height: 18px;
+            max-width: 18px;
+            max-height: 18px;
+            object-fit: contain;
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -308,6 +373,14 @@
 
                 error_span.addClass( "d-none");
             });
+        }
+
+        function clear_data(x)
+        {
+            let modal_name = $(x).attr('data-target');
+
+            $(modal_name).find('input').val('');
+            $(modal_name).find('select').prop('selectedIndex', 0).trigger('change');
         }
 
         function animate_btn(id,text,scope)

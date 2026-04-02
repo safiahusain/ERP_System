@@ -5,9 +5,11 @@
         <div class="card">
             <div class="card-body">
                 <h5 class="card-header header-primary">Roles
-                    <a href="javascript:void(0)" class="float-right data-value" data-toggle="modal" data-target="#create_modal" onclick="clear_data(this)" title="{{ __('Create') }}">
-                        <img src="{{asset('images/icons/create.png')}}" class="create-btn">
-                    </a>
+                    @if (array_key_exists("ROLECRT",$auth->func) || $auth->role == "super_admin")
+                        <a href="javascript:void(0)" class="float-right data-value" data-toggle="modal" data-target="#create_modal" onclick="clear_data(this)" title="{{ __('Create') }}">
+                            <img src="{{asset('images/icons/create.png')}}" class="create-btn">
+                        </a>
+                    @endif
                 </h5>
                 <div id="table-data">
 
@@ -38,8 +40,7 @@
                 $('li').removeClass('active');
                 $(this).parent('li').addClass('active');
                 var my_url  =   $(this).attr('href');
-                page        =   $(this).attr('href').split('page=')[1];
-                // loader_on();
+                var page    =   $(this).attr('href').split('page=')[1];
                 fetch_data(page);
             });
         });
@@ -56,7 +57,7 @@
         {
             // loader_on();
 
-            var next_url    = "{{route('role-index')}}";
+            var next_url    =   "{{route('role-index')}}?page="+page;
 
             $.ajax(
             {
@@ -66,6 +67,7 @@
                 success     :   function(success_response)
                 {
                     $('#table-data').empty().html(success_response);
+                    location.hash   =   page;
                     // loader_off();
                 },
                 error       :   function(error_response)
@@ -150,15 +152,18 @@
             if (role.is_system == 1)
             {
                 $("#tag_update").attr("readonly", true);
+                $("#update_linked_role_div").addClass('d-none');
             }
             else
             {
                 $("#tag_update").attr("readonly", false);
+                $("#update_linked_role_div").removeClass('d-none');
+                $("#linked_role").val(role.linked_role_tag).trigger("change");
             }
 
             clear_fields(my_array,type);
             $("#name_update").val(role.name);
-            $("#tag_update").val(role.slug);
+            $("#tag_update").val(role.tag);
             my_from.attr("action",url);
             $("#update_modal").modal('show');
         }
@@ -198,7 +203,7 @@
 
                     if (error_resp.status   ==  422)
                     {
-                        let my_array    =   ['name', 'slug'];
+                        let my_array    =   ['name', 'tag'];
                         let type        =   'update_';
                         var obj         =   error_resp.responseJSON.errors;
 

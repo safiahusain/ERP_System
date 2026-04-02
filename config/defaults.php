@@ -2,10 +2,11 @@
 
 return [
     'roles' => [
-        "admin"     =>  "admin",
-        "manager"   =>  "manager",
-        "team"      =>  "team",
-        "client"    =>  "client",
+        "super_admin"   =>  "super_admin",
+        "admin"         =>  "admin",
+        "manager"       =>  "manager",
+        "team"          =>  "team",
+        "client"        =>  "client",
     ],
     'functionalities' => [
         'dashboard' => [
@@ -27,17 +28,6 @@ return [
             'order' => 1,
             'data'  => [
                 'route' => 'user-index',
-                'icon'  => 'menu',
-            ],
-        ],
-        'role' => [
-            'tag'   => 'ROLE',
-            'target'=> 'menu',
-            'status'=> 1,
-            'parent_id' => null,
-            'order' => 0,
-            'data'  => [
-                'route' => 'role-index',
                 'icon'  => 'menu',
             ],
         ],
@@ -73,12 +63,39 @@ return [
             'order' => 3,
             'data'  => [],
         ],
+        'show-team-lead' => [
+            'tag'   => 'USERSHOWTMLEAD',
+            'target'=> 'action',
+            'status'=> 1,
+            'parent_id' => null,
+            'order' => 4,
+            'data'  => [],
+        ],
+        'assign-team-lead' => [
+            'tag'   => 'USERASTMLEAD',
+            'target'=> 'action',
+            'status'=> 1,
+            'parent_id' => null,
+            'order' => 5,
+            'data'  => [],
+        ],
+        'role' => [
+            'tag'   => 'ROLE',
+            'target'=> 'menu',
+            'status'=> 1,
+            'parent_id' => null,
+            'order' => 2,
+            'data'  => [
+                'route' => 'role-index',
+                'icon'  => 'menu',
+            ],
+        ],
         'role-index' => [
             'tag'   => 'ROLEIND',
             'target'=> 'action',
             'status'=> 1,
             'parent_id' => null,
-            'order' => 4,
+            'order' => 0,
             'data'  => [],
         ],
         'role-create' => [
@@ -86,7 +103,7 @@ return [
             'target'=> 'action',
             'status'=> 1,
             'parent_id' => null,
-            'order' => 5,
+            'order' => 1,
             'data'  => [],
         ],
         'role-update' => [
@@ -94,7 +111,7 @@ return [
             'target'=> 'action',
             'status'=> 1,
             'parent_id' => null,
-            'order' => 6,
+            'order' => 2,
             'data'  => [],
         ],
         'role-delete' => [
@@ -102,7 +119,7 @@ return [
             'target'=> 'action',
             'status'=> 1,
             'parent_id' => null,
-            'order' => 7,
+            'order' => 3,
             'data'  => [],
         ],
         'role-permission' => [
@@ -110,7 +127,7 @@ return [
             'target'=> 'action',
             'status'=> 1,
             'parent_id' => null,
-            'order' => 8,
+            'order' => 4,
             'data'  => [],
         ],
     ],

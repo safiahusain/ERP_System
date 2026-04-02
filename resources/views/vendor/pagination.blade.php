@@ -3,11 +3,11 @@
         <ul class="pagination pagination">
             @if ($paginator->onFirstPage())
                 <li class="page-item disabled" aria-disabled="true" aria-label="@lang('pagination.previous')">
-                    <span class="page-link" aria-hidden="true"><i class="fa fa-angle-double-left" aria-hidden="true"></i></span>
+                    <span class="page-link" aria-hidden="true"><img src="{{asset('images/icons/left-angle.png')}}"></span>
                 </li>
             @else
                 <li class="page-item">
-                    <a onclick="page_link_toggle(event,this);" class="page-link" href="{{ $paginator->previousPageUrl() }}" rel="prev" aria-label="@lang('pagination.previous')"><i class="fa fa-angle-double-left" aria-hidden="true"></i></a>
+                    <a onclick="page_link_toggle(event,this);" class="page-link" href="{{ $paginator->previousPageUrl() }}" rel="prev" aria-label="@lang('pagination.previous')"><img src="{{asset('images/icons/left-angle.png')}}"></a>
                 </li>
             @endif
             @if($paginator->currentPage() > 2)
@@ -45,11 +45,18 @@
             @endif
             @if ($paginator->hasMorePages())
                 <li class="page-item">
-                    <a onclick="page_link_toggle(event,this);" class="page-link" href="{{ $paginator->nextPageUrl() }}" rel="next" aria-label="@lang('pagination.next')"><i class="fa fa-angle-double-right" aria-hidden="true"></i></a>
+                    <a onclick="page_link_toggle(event,this);"
+                    class="page-link"
+                    href="{{ $paginator->nextPageUrl() }}"
+                    rel="next">
+                        <img src="{{asset('images/icons/right-angle.png')}}">
+                    </a>
                 </li>
             @else
-                <li class="page-item disabled" aria-disabled="true" aria-label="@lang('pagination.next')">
-                    <span class="page-link" aria-hidden="true"><i class="fa fa-angle-double-right" aria-hidden="true"></i></span>
+                <li class="page-item disabled">
+                    <span class="page-link">
+                        <img src="{{asset('images/icons/right-angle.png')}}">
+                    </span>
                 </li>
             @endif
         </ul>
