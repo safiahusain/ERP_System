@@ -16,24 +16,24 @@ class UserSeeder extends Seeder
     */
     public function run()
     {
-        $role  = Role::where('name', 'super_admin')->first();
+        $role  = Role::where('name', 'Admin')->first();
 
         if (!$role)
         {
             $role = Role::create([
-                'tag' => 'super_admin',
+                'name' => 'Admin',
             ]);
         }
 
-        $user  =   User::where('role_tag', $role->tag)->first();
+        $user  =   User::where('role_id', $role->id)->first();
 
         if (!$user)
         {
             User::create([
-                'name'      =>  'Super Admin',
-                'email'     =>  'superadmin@promanage.com',
+                'name'      =>  'Admin',
+                'email'     =>  'admin@promanage.com',
                 'password'  =>  Hash::make('admin123'),
-                'role_tag'  =>  $role->tag,
+                'role_id'   =>  $role->id,
             ]);
         }
     }

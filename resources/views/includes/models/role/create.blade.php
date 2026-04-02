@@ -16,22 +16,6 @@
                             'col' => 'col-md-12 col-12',
                             'target' => 'create'
                         ])
-
-                        <div class="col-md-12 col-12">
-                            <div class="form-group">
-                                <label>{{ __('Role') }}</label>
-                                <select class='form-control select2' name='linked_role' style="width: 100%">
-                                    <option disabled selected>{{ __('Select User') }}</option>
-                                    @foreach (config('defaults.roles') as $key => $role)
-                                        @if ($key != "super_admin")
-                                            <option value="{{ $key }}">{{ $role }}</option>
-                                        @endif
-                                    @endforeach
-                                </select>
-                                <small class="text-danger" id="create_linked_role"></small>
-                            </div>
-                        </div>
-
                         <hr>
                         <div class="float-right">
                             <button class="btn-modern btn-danger" data-dismiss="modal">{{ __('Cancel') }}</button>

@@ -28,11 +28,11 @@ class RoleController extends Controller
         $success    =   false;
         $allowed    =   array_key_exists("ROLE",$auth->func);
 
-        if ($allowed || $auth->role == "super_admin")
+        if ($allowed)
         {
             if ($request->ajax())
             {
-                $roles  =   Role::paginate(10);
+                $roles  =   Role::paginate(3);
 
                 return view('includes.tables.role.table', compact(
                     'roles',
@@ -61,32 +61,20 @@ class RoleController extends Controller
         $type       =   'info';
         $code       =   401;
         $success    =   false;
-        $allowed    =   array_key_exists("ROLECRT",$auth->func);
+        $allowed    =   array_key_exists("USERCRT",$auth->func);
 
-        if ($allowed || $auth->role == "super_admin")
+        if ($allowed)
         {
             $rules          =   [
-                'name'          =>  ['required', 'string', 'max:255'],
-                'tag'           =>  ['required', 'string', 'lowercase', 'max:50', 'regex:/^[a-z0-9\-]+$/', 'unique:roles,tag'],
-                'linked_role'   =>  ['required','string',
-                                        function ($attribute, $value, $fail)
-                                        {
-                                            $roleExists = Role::where(['tag'=> $value, "is_system" => true])->exists();
-
-                                            if (!$roleExists)
-                                            {
-                                                $fail('The selected linked role is invalid. Role tag does not exist.');
-                                            }
-                                        },
-                                    ],
+                'name'  =>  ['required', 'string', 'max:255'],
+                'tag'   =>  ['required', 'string', 'lowercase', 'max:50', 'regex:/^[a-z0-9\-]+$/', 'unique:roles,slug']
             ];
 
             $request->validate($rules);
 
             $created    =   Role::create([
-                'name'              =>  $request->name,
-                'tag'               =>  $request->tag,
-                'linked_role_tag'   =>  $request->linked_role,
+                'name'  =>  $request->name,
+                'slug'  =>  $request->tag,
             ]);
 
             $message    =   trans('Something went wrong while creating role');
@@ -116,9 +104,9 @@ class RoleController extends Controller
         $type       =   'info';
         $code       =   401;
         $success    =   false;
-        $allowed    =   array_key_exists("ROLEUPD",$auth->func);
+        $allowed    =   array_key_exists("USERUPD",$auth->func);
 
-        if ($allowed || $auth->role == "super_admin")
+        if ($allowed)
         {
             $role       =   Role::find($id);
             $message    =   trans('Role not found');
@@ -128,46 +116,27 @@ class RoleController extends Controller
             if($role)
             {
                 $rules          =   [
-                    'name'          =>  ['required', 'string', 'max:255'],
-                    'tag'           =>  ['required', 'string', 'lowercase', 'max:50', 'regex:/^[a-z0-9\-]+$/', Rule::unique('roles', 'tag')->ignore($role->id)],
-                    'linked_role'   =>  ['required','string',
-                                            function ($attribute, $value, $fail)
-                                            {
-                                                $roleExists = Role::where(['tag'=> $value, "is_system" => true])->exists();
-
-                                                if (!$roleExists)
-                                                {
-                                                    $fail('The selected linked role is invalid. Role tag does not exist.');
-                                                }
-                                            },
-                                        ],
+                    'name'  =>  ['required', 'string', 'max:255'],
+                    'tag'   =>  ['required', 'string', 'lowercase', 'max:50', 'regex:/^[a-z0-9\-]+$/', Rule::unique('roles', 'slug')->ignore($role->id)]
                 ];
 
                 $request->validate($rules);
 
-                $message    =   trans('You are not allowed to update that role');
+                $created    =   $role->update([
+                    'name'  =>  $request->name,
+                    'slug'  =>  $request->tag,
+                ]);
+
+                $message    =   trans('Something went wrong while updating role');
                 $type       =   'error';
-                $code       =   401;
+                $code       =   500;
 
-                if(!$role->is_system)
+                if ($created)
                 {
-                    $updated    =   $role->update([
-                        'name'              =>  $request->name,
-                        'tag'               =>  $request->tag,
-                        'linked_role_tag'   =>  $request->linked_role,
-                    ]);
-
-                    $message    =   trans('Something went wrong while updating role');
-                    $type       =   'error';
-                    $code       =   500;
-
-                    if ($updated)
-                    {
-                        $message    =   trans('Role updated Successfully');
-                        $type       =   'success';
-                        $code       =   200;
-                        $success    =   true;
-                    }
+                    $message    =   trans('Role updated Successfully');
+                    $type       =   'success';
+                    $code       =   200;
+                    $success    =   true;
                 }
             }
         }
@@ -188,7 +157,7 @@ class RoleController extends Controller
         $success    =   false;
         $allowed    =   array_key_exists("ROLEDLT",$auth->func);
 
-        if ($allowed || $auth->role == "super_admin")
+        if ($allowed)
         {
             $role       =   Role::find($id);
             $message    =   trans('Role not found');
@@ -232,10 +201,11 @@ class RoleController extends Controller
         $message    =   trans('messages.un_authorized');
         $type       =   'info';
         $code       =   401;
-        $allowed    =   array_key_exists("ROLEPRMSION",$auth->func);
+        $func       =   $auth->func;
+        $allowed    =   array_key_exists("ROLEPRMSION",$func);
         $htm_text   =   "";
 
-        if ($allowed || $auth->role == "super_admin")
+        if ($allowed)
         {
             if ($request->ajax())
             {
@@ -251,15 +221,14 @@ class RoleController extends Controller
                     if ($functionality)
                     {
                         // Separate menus
-                        $menus  =   $functionality->where('target', 'menu');
-                        $func   =   $role->functionalities->pluck('tag')->toArray();
+                        $menus = $functionality->where('target', 'menu');
 
                         if ($menus->count())
                         {
                             foreach ($menus as $menu)
                             {
                                 $group = preg_replace('/[^a-zA-Z0-9_-]/', '_', strtoupper($menu->tag));
-                                $parentChecked = in_array($menu->tag, $func) ? 'checked' : '';
+                                $parentChecked = in_array($menu->id, array_column($func, 'id')) ? 'checked' : '';
 
                                 $htm_text .= "<div class='permission-group mb-4'>
                                                 <div class='form-check mb-2'>
@@ -282,7 +251,7 @@ class RoleController extends Controller
 
                                 foreach ($actions as $action)
                                 {
-                                    $childChecked = in_array($action->tag, $func) ? 'checked' : '';
+                                    $childChecked = in_array($action->id, array_column($func, 'id')) ? 'checked' : '';
 
                                     $htm_text .= "<div class='col-md-3'>
                                                     <div class='form-check'>
@@ -326,7 +295,7 @@ class RoleController extends Controller
         $code       =   401;
         $allowed    =   array_key_exists("ROLEPRMSION",$auth->func);
 
-        if ($allowed || $auth->role == "super_admin")
+        if ($allowed)
         {
             $role       =   Role::find($id);
             $message    =   "Role not found";
@@ -337,9 +306,9 @@ class RoleController extends Controller
                 $message    =   trans('messages.something_went_wrong');
                 $type       =   'info';
                 $code       =   423;
-                $action_ids =   $request->action_ids    ??  [];
+                $action_ids =   $request->action_ids;
 
-                if ($action_ids && !is_array($action_ids))
+                if (!is_array($action_ids))
                 {
                     $action_ids = explode(',', $action_ids);
                 }

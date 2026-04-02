@@ -22,12 +22,10 @@
                             <div class="col-md-6 col-12">
                                 <div class="form-group">
                                     <label>{{ __('Role') }}</label>
-                                    <select class='form-control select2' name='role' onchange="show_fields(this, 'create')" style="width: 100%">
+                                    <select class='form-control select2' name='role' onchange="show_fields(this)" style="width: 100%">
                                         <option disabled selected>{{ __('Select User') }}</option>
-                                        @foreach ($roles as $key => $role)
-                                            @if ($role['tag'] != "super_admin")
-                                                <option value="{{ $role['tag'] }}">{{ $role['name'] }}</option>
-                                            @endif
+                                        @foreach (config('defaults.roles') as $key => $role)
+                                            <option value="{{ $key }}">{{ $role }}</option>
                                         @endforeach
                                     </select>
                                     <small class="text-danger" id="create_role"></small>
@@ -35,7 +33,7 @@
                             </div>
 
                             <!-- Hidden Fields -->
-                            <div id="show_hidden_fields_create" class="d-none">
+                            <div id="show_hidden_fields" class="d-none">
                                 <div class="row">
                                     @include('includes.models.create-field', [
                                         'fields' => ['company_name', 'company_contact', 'company_address'],

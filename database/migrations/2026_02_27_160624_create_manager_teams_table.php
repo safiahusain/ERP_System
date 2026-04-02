@@ -15,11 +15,11 @@ return new class extends Migration
     {
         Schema::create('manager_teams', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('manager_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('team_member_id')->constrained('users')->onDelete('cascade');
+            $table->unsignedBigInteger('manager_id')->nullable();
+            $table->foreign('manager_id')->references('id')->on('users')->onDelete('set null');
+            $table->unsignedBigInteger('team_member_id')->nullable();
+            $table->foreign('team_member_id')->references('id')->on('users')->onDelete('set null');
             $table->timestamps();
-
-            $table->unique(['manager_id', 'team_member_id']);
         });
     }
 

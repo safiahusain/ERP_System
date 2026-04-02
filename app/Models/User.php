@@ -20,9 +20,9 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'phone',
+        'contact',
         'address',
-        'role_tag',
+        'role_id',
         'password',
     ];
 
@@ -45,73 +45,22 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function role()
+    public function roles()
     {
-        return $this->belongsTo(Role::class, 'role_tag', 'tag');
+        return $this->belongsTo(Role::class,'role_id');
     }
 
-    public function scopeManagers($query)
+    public function client()
     {
-        $managerTags = Role::getManagerRoleTags();
-
-        return $query->whereIn('role_tag', $managerTags);
+        return $this->hasOne(UserDetail::class);
     }
 
-    public function scopeTeamMem($query)
+    public function addClient($attribs)
     {
-        $teamTags = Role::getTeamRoleTags();
+        $user = $this->create($attribs);
 
-        return $query->whereIn('role_tag', $teamTags);
-    }
+        $user->client()->create($attribs);
 
-    // User Model mein yeh ek method kaafi hai
-    public function isManagerType()
-    {
-        $roleTag = $this->role_tag; // ya $this->roles->first()->tag
-
-        if ($roleTag === 'manager') {
-            return true;
-        }
-
-        $role = Role::where('tag', $roleTag)->first();
-        return $role && $role->linked_role_tag === 'manager';
-    }
-
-    /// User Model mein yeh ek method kaafi hai
-    public function isTeamMemberType()
-    {
-        $roleTag = $this->role_tag; // ya $this->roles->first()->tag
-
-        if ($roleTag === 'team') {
-            return true;
-        }
-
-        $role = Role::where('tag', $roleTag)->first();
-        return $role && $role->linked_role_tag === 'team';
-    }
-    /**
-     * Users jinke yeh user manager hai (team members)
-     */
-    public function teamMembers()
-    {
-        return $this->belongsToMany(
-            User::class,           // Related model
-            'manager_teams',        // Pivot table name
-            'manager_id',           // Foreign key for this model in pivot table
-            'team_member_id'        // Foreign key for related model in pivot table
-        )->withTimestamps();        // Agar pivot table mein timestamps hain to
-    }
-
-    /**
-     * Users jo is user ke managers hain
-     */
-    public function TeamManagers()
-    {
-        return $this->belongsToMany(
-            User::class,           // Related model
-            'manager_teams',        // Pivot table name
-            'team_member_id',       // Foreign key for this model in pivot table
-            'manager_id'            // Foreign key for related model in pivot table
-        )->withTimestamps();        // Agar pivot table mein timestamps hain to
+        return $user;
     }
 }

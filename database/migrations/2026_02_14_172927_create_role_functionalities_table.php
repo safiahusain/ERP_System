@@ -13,21 +13,9 @@ return new class extends Migration
     {
         Schema::create('role_functionalities', function (Blueprint $table) {
             $table->id();
-            $table->string('role_tag'); // role_id ki jagah role_tag
+            $table->foreignId('role_id')->constrained()->onDelete('cascade');
             $table->foreignId('functionality_id')->constrained()->onDelete('cascade');
             $table->timestamps();
-
-            // Foreign key constraint with roles table (via tag)
-            $table->foreign('role_tag')
-                  ->references('tag')
-                  ->on('roles')
-                  ->onDelete('cascade');
-
-            // Unique constraint to prevent duplicate assignments
-            $table->unique(['role_tag', 'functionality_id']);
-
-            // Index for performance
-            $table->index('role_tag');
         });
     }
 

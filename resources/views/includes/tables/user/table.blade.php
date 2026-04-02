@@ -15,25 +15,16 @@
                 <tr>
                     <td> {{ ucwords($user->name) ??  "" }} </td>
                     <td> {{ $user->email ??  "" }} </td>
-                    <td> {{ $user->role    ?   ucwords($user->role->name)   : '' }} </td>
-                    <td> {{ $user->phone ??  "" }} </td>
+                    <td> {{ $user->roles    ?   ucwords($user->roles->name)   : '' }} </td>
+                    <td> {{ $user->contact ??  "" }} </td>
                     <td> {{ $user->address ??  "" }} </td>
                     <td>
-                        @if (array_key_exists("USERCRT",$auth->func))
-                            <a href="javascript:void(0)" onclick="assign_to_update(this, {{$user}})" data-bs-toggle="tooltip" title="{{ __('Update') }}">
-                                <img src="{{asset('images/icons/edit.png')}}" class="filters-btn">
-                            </a>
-                        @endif
-                        @if(array_key_exists("USERCRT",$auth->func) && ($user->isTeamMemberType() || $user->isManagerType()))
-                            <a href="javascript:void(0)" onclick="showUserAssignments(this, {{$user}})" data-bs-toggle="tooltip" title="{{ __('Update') }}">
-                                <img src="{{asset('images/icons/assign_leader.png')}}" class="filters-btn">
-                            </a>
-                        @endif
-                        @if (array_key_exists("USERCRT",$auth->func))
-                            <a href="javascript:void(0)" data-bs-toggle="tooltip" title="{{ __('Delete') }}">
-                                <img src="{{asset('images/icons/delete.png')}}" class="filters-btn">
-                            </a>
-                        @endif
+                        <a href="javascript:void(0)" data-bs-toggle="tooltip" title="{{ __('Download') }}">
+                            <img src="{{asset('images/icons/edit.png')}}" class="filters-btn">
+                        </a>
+                        <a href="javascript:void(0)" data-bs-toggle="tooltip" title="{{ __('Download') }}">
+                            <img src="{{asset('images/icons/delete.png')}}" class="filters-btn">
+                        </a>
                     </td>
                 </tr>
             @endforeach

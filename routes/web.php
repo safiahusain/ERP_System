@@ -31,6 +31,3 @@ Route::post('/role/action/update/{id}', [App\Http\Controllers\RoleController::cl
 
 Route::get('/user/index', [App\Http\Controllers\UserController::class, 'index'])->name('user-index');
 Route::post('/user/create', [App\Http\Controllers\UserController::class, 'create'])->name('user-create');
-Route::post('/user/update/{id}', [App\Http\Controllers\UserController::class, 'update'])->name('user-update');
-Route::get('/show/user/assign/{id}',[App\Http\Controllers\UserController::class, 'showUserAssign'])->name('show-user-assign');
-Route::post('/store/user/assign/{id}',[App\Http\Controllers\UserController::class, 'storeUserAssign'])->name('store-user-assign');

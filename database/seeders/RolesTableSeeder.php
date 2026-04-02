@@ -18,14 +18,14 @@ class RolesTableSeeder extends Seeder
         foreach (config('defaults.roles') as $key => $value)
         {
             $found  =   Role::where([
-                'tag'      =>  $key,
+                'slug'      =>  $key,
             ])->first();
 
             if (!$found)
             {
                 Role::create([
                     'name'      =>  $value,
-                    'tag'       =>  $key,
+                    'slug'      =>  $key,
                     'is_system' =>  1,
                 ]);
             }
