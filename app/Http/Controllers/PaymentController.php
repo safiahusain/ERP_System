@@ -25,7 +25,7 @@ class PaymentController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function index(Request $request, $id)
+    public function index(Request $request, $id = null)
     {
         $auth    =   AuthHelper::checkAuth();
         $user    =   $auth->user;
@@ -35,7 +35,9 @@ class PaymentController extends Controller
         {
             if ($request->ajax())
             {
-                $payments  =   Payment::where('invoice_id', $id)->latest()->paginate(10);
+                $payments   =   $id
+                                ?   Payment::where('invoice_id', $id)->latest()->paginate(10)
+                                :   Payment::latest()->paginate(10);
 
                 return view('includes.tables.payment.table', compact(
                     'payments',

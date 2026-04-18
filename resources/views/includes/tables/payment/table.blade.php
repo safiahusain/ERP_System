@@ -32,7 +32,7 @@
             @endforeach
         @else
             <tr>
-                <td colspan="3">
+                <td colspan="20">
                     <div class="text-center">
                         <h5>
                             {{ __('data.no_record_found') }}

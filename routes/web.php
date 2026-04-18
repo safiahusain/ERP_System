@@ -84,7 +84,7 @@ Route::get('/invoice/delete/{id}', [InvoiceController::class, 'delete'])->name('
 
 // Payment Routes Start
 
-Route::get('/payment/index/{id}', [PaymentController::class, 'index'])->name('payment-index');
+Route::get('/payment/index/{id?}', [PaymentController::class, 'index'])->name('payment-index');
 Route::post('/payment/create', [PaymentController::class, 'create'])->name('payment-create');
 Route::post('/payment/update/{id}', [PaymentController::class, 'update'])->name('payment-update');
 Route::get('/payment/delete/{id}', [PaymentController::class, 'delete'])->name('payment-delete');

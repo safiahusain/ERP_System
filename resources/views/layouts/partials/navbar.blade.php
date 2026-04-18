@@ -1,3 +1,11 @@
+<style>
+    .navbar .dropdown-menu.show {
+        display: block;
+        position: absolute;
+        right: 0;
+        left: auto;
+    }
+</style>
 <nav class="navbar default-layout col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
 
     <!-- Logo -->
@@ -28,7 +36,7 @@
 
             <!-- User Dropdown -->
             <li class="nav-item dropdown d-none d-xl-inline-block user-dropdown">
-                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="userDropdownToggle">
 
                     <!-- Profile Image (optional default image) -->
                     <img class="img-xs rounded-circle"
@@ -36,7 +44,7 @@
                          alt="Profile image">
                 </a>
 
-                <div class="dropdown-menu dropdown-menu-right navbar-dropdown">
+                <div class="dropdown-menu dropdown-menu-right navbar-dropdown" id="userDropdownMenu">
 
                     <!-- User Info -->
                     <div class="dropdown-header text-center">
@@ -60,11 +68,11 @@
                     </a>
 
                     <!-- Logout -->
-                    <form method="POST" action="{{ route('logout') }}">
+                    <form method="POST" action="{{ route('logout') }}" id="logout-form">
                         @csrf
                         <a href="{{ route('logout') }}"
                            class="dropdown-item"
-                           onclick="event.preventDefault(); this.closest('form').submit();">
+                           onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                             Sign Out
                             <i class="dropdown-item-icon ti-power-off"></i>
                         </a>
@@ -84,3 +92,21 @@
 
     </div>
 </nav>
+<script>
+    document.getElementById('userDropdownToggle').addEventListener('click', function(e) {
+        e.preventDefault();
+        var menu = document.getElementById('userDropdownMenu');
+        if (menu.classList.contains('show')) {
+            menu.classList.remove('show');
+        } else {
+            menu.classList.add('show');
+        }
+    });
+    document.addEventListener('click', function(e) {
+        var menu = document.getElementById('userDropdownMenu');
+        var toggle = document.getElementById('userDropdownToggle');
+        if (!menu.contains(e.target) && !toggle.contains(e.target)) {
+            menu.classList.remove('show');
+        }
+    });
+</script>

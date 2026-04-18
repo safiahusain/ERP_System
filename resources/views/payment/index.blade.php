@@ -1,138 +1,271 @@
 @extends('layouts.app')
+
 @php
     $target = 'payment';
 @endphp
+
 @section('css')
     <style>
-        .card-custom {
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        /* ================= HEADER ================= */
+        .payment-header-card {
+            background: linear-gradient(135deg, #1e3a8a, #2563eb);
+            border-radius: 18px;
+            color: white;
+            position: relative;
+            overflow: hidden;
         }
 
-        .badge-paid {
-            background: #d1f7e1;
-            color: #0f9d58;
+        .payment-header-card::after {
+            content: "";
+            position: absolute;
+            right: -60px;
+            top: -60px;
+            width: 220px;
+            height: 220px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 50%;
         }
 
-        .badge-partial {
-            background: #fff4cc;
-            color: #f4b400;
+        /* ================= CARDS ================= */
+        .payment-stat-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #f1f5f9;
+            transition: 0.3s;
         }
 
-        .badge-unpaid {
-            background: #fde2e2;
-            color: #d93025;
+        .payment-stat-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
         }
 
-        .table-modern thead {
-            background: #f8f9fa;
+        /* ================= ICON ================= */
+        .icon-bg {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .table-modern tbody tr:hover {
-            background: #f1f3f5;
+        .icon-bg.primary { background: rgba(37, 99, 235, 0.1); color: #2563eb; }
+        .icon-bg.success { background: rgba(22, 163, 74, 0.1); color: #16a34a; }
+        .icon-bg.danger { background: rgba(220, 38, 38, 0.1); color: #dc2626; }
+
+        /* ================= BADGE ================= */
+        .status-badge {
+            padding: 6px 12px;
+            font-size: 11px;
+            border-radius: 999px;
+            font-weight: 600;
+        }
+
+        .status-paid { background: #dcfce7; color: #16a34a; }
+        .status-partial { background: #fef9c3; color: #ca8a04; }
+        .status-unpaid { background: #fee2e2; color: #dc2626; }
+
+        /* ================= TABLE ================= */
+        .payment-table-card {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid #f1f5f9;
+        }
+
+        .payment-table thead {
+            background: #f8fafc;
+        }
+
+        .payment-table th {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #64748b;
+        }
+
+        .payment-table tbody tr {
             transition: 0.2s;
         }
 
-        .btn-custom {
-            border-radius: 8px;
-            padding: 6px 14px;
+        .payment-table tbody tr:hover {
+            background: #f9fafb;
+            transform: scale(1.01);
         }
 
+        /* ================= PROGRESS ================= */
+        .progress-bar-custom {
+            height: 10px;
+            border-radius: 10px;
+            background: #f1f5f9;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #22c55e, #4ade80);
+        }
+
+        /* ================= BUTTON ================= */
+        .btn-primary {
+            border-radius: 10px;
+        }
+
+        /* ================= SECTION ================= */
         .section-title {
-            font-weight: 600;
-            font-size: 18px;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .section-subtitle {
+            font-size: 13px;
+            color: #64748b;
         }
     </style>
 @endsection
+
 @section('content')
-    <div class="container py-4">
+<div class="container-fluid py-4">
 
-        <!-- Invoice Card -->
-        <div class="card card-custom mb-4">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="mb-0">Invoice #{{ $invoice->id }}</h4>
+    @if($id)
+        <!-- HEADER -->
+        <div class="payment-header-card mb-4 p-4">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h4 class="fw-bold mb-1">Invoice #{{ $invoice->id }}</h4>
+                    <small>{{ $invoice->client->name }}</small>
 
-                    <span class="badge
-                        @if($invoice->status == 'Paid') badge-paid
-                        @elseif($invoice->status == 'Partial') badge-partial
-                        @else badge-unpaid @endif">
+                    <div class="row mt-3">
+                        <div class="col-4">
+                            <small>Invoice Date</small>
+                            <div>{{ $invoice->date }}</div>
+                        </div>
+                        <div class="col-4">
+                            <small>Due Date</small>
+                            <div>{{ $invoice->due_date ?? 'N/A' }}</div>
+                        </div>
+                        <div class="col-4">
+                            <small>Project</small>
+                            <div>{{ $invoice->project->title ?? 'N/A' }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <h2 class="fw-bold">${{ number_format($invoice->total_amount,2) }}</h2>
+
+                    <span class="status-badge
+                        @if($invoice->status=='Paid') status-paid
+                        @elseif($invoice->status=='Partial') status-partial
+                        @else status-unpaid @endif">
                         {{ $invoice->status }}
                     </span>
                 </div>
+            </div>
+        </div>
 
-                <div class="row">
-                    <div class="col-md-6">
-                        <p><strong>Client:</strong> {{ $invoice->client->name }}</p>
-                        <p><strong>Date:</strong> {{ $invoice->date }}</p>
-                    </div>
-                    <div class="col-md-6 text-md-end">
-                        <p><strong>Total:</strong> ${{ number_format($invoice->total_amount, 2) }}</p>
-                        <p><strong>Paid:</strong> ${{ $invoice->payments->sum('amount') }}</p>
+        <!-- STATS -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="payment-stat-card">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <small>Total</small>
+                            <h5>${{ number_format($invoice->total_amount,2) }}</h5>
+                        </div>
+                        <div class="icon-bg primary">
+                            <i class="mdi mdi-currency-usd"></i>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Payments Section -->
-        <div class="bg-white shadow-md rounded-lg p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold">Payments</h3>
-                @if (array_key_exists("PAYMENTCRT",$auth->func))
-                    <a href="javascript:void(0)" class="float-right data-value" data-toggle="modal" data-target="#create-payment-modal" onclick="clear_data(this)" title="{{ __('Create') }}">
-                        <img src="{{asset('images/icons/create.png')}}" class="create-btn">
-                    </a>
-                @endif
+            <div class="col-md-4">
+                <div class="payment-stat-card">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <small>Paid</small>
+                            <h5 class="text-success">
+                                ${{ number_format($invoice->payments->sum('amount'),2) }}
+                            </h5>
+                        </div>
+                        <div class="icon-bg success">
+                            <i class="mdi mdi-check"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div id="invoice-table-data">
+            <div class="col-md-4">
+                @php
+                    $total = $invoice->total_amount;
+                    $paid  = $invoice->payments->sum('amount');
+                    $percent = $total > 0 ? ($paid / $total) * 100 : 0;
+                @endphp
 
+                <div class="payment-stat-card">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <small>Balance</small>
+                            <h5 class="text-danger">
+                                ${{ number_format($total - $paid,2) }}
+                            </h5>
+                        </div>
+                        <div class="icon-bg danger">
+                            <i class="mdi mdi-minus"></i>
+                        </div>
+                    </div>
+
+                    <div class="progress-bar-custom mt-3">
+                        <div class="progress-bar-fill" style="width: {{ $percent }}%"></div>
+                    </div>
+                    <small>{{ round($percent) }}% Paid</small>
+                </div>
             </div>
         </div>
+    @endif
+
+    <!-- TABLE -->
+    <div class="payment-table-card p-4">
+        <div class="d-flex justify-content-between mb-3">
+            <div>
+                <h5 class="section-title">Payment History</h5>
+                <small class="section-subtitle">Manage invoice payments</small>
+            </div>
+
+            @if (array_key_exists("PAYMENTCRT",$auth->func))
+                <a href="javascript:void(0)" class="float-right data-value" data-toggle="modal" data-target="#create-payment-modal" onclick="clear_data(this)" title="{{ __('Create') }}">
+                    <img src="{{asset('images/icons/create.png')}}" class="create-btn">
+                </a>
+            @endif
+        </div>
+
+        <div id="payment-table-data"></div>
     </div>
-    @include('includes.models.payment.create')
-    @include('includes.models.payment.update')
-    @include('includes.models.delete-recode',[
-        'target' => $target
-    ])
+
+</div>
+
+@include('includes.models.payment.create')
+@include('includes.models.payment.update')
+@include('includes.models.delete-recode',['target'=>$target])
 @endsection
+
+
 @section('js')
     <script>
-        let selectedIds =   [];
-        let my_array    =   ['project', 'assigned_by', 'assigned_to', 'title', 'description', 'priority', 'status', 'due_date', 'completed_at'];
-        let id          =   "{{$id}}";
+        let id = "{{$id}}";
 
-        $(document).ready(function()
-        {
-            setTimeout(function()
-            {
-                fetch_data(1);
-            }, 100);
+        $(document).ready(function() {
+            fetch_payment(1);
 
-            $(document).on('click', '.pagination a', function(event)
-            {
-                event.preventDefault();
-                $('li').removeClass('active');
-                $(this).parent('li').addClass('active');
-                var my_url  =   $(this).attr('href');
-                var page    =   $(this).attr('href').split('page=')[1];
-                fetch_data(page);
+            $(document).on('click', '.pagination a', function(e) {
+                e.preventDefault();
+                fetch_payment($(this).attr('href').split('page=')[1]);
             });
-
-            initDatePicker("#due_date_create");
         });
 
-        $('.select2').select2();
-        $('.select2bs4').select2(
+        function fetch_payment(page)
         {
-            theme : 'bootstrap4'
-        });
-
-        function fetch_data(page)
-        {
-            var route   =   "{{ route('payment-index', ':id') }}";
-            route       =   route.replace(':id', id);
+            var route = "{{ route('payment-index', ':id') }}".replace(':id', id);
 
             $.ajax(
             {
@@ -154,91 +287,6 @@
                     toastr['error']('Server error','Error');
                 }
             });
-        }
-
-        function assign_to_update(x, invoice)
-        {
-            let my_from     =   $("#update-invoice-form");
-            var url         =   "{{ route('invoice-update', ':id') }}";
-            url             =   url.replace(':id', invoice.id);
-            let type        =   'update_';
-
-            clear_fields(my_array,type);
-            $("#project_update").val(invoice.project_id).trigger('change');
-            $("#assigned_to_update").val(invoice.assigned_to).trigger('change');
-            $("#title_update").val(invoice.title);
-            $("#description_update").val(invoice.description);
-            $("#priority_update").val(invoice.priority).trigger('change');
-            $("#status_update").val(invoice.status).trigger('change');
-            $("#due_date_update").val(invoice.due_date).trigger('change');
-            initDatePicker("#due_date_update").setDate(invoice.due_date);
-            initDatePicker("#completed_at_update").setDate(invoice.completed_at);
-
-            my_from.attr("action",url);
-            $("#update-invoice-modal").modal('show');
-        }
-
-        function get_data_to_view_invoice(x)
-        {
-            let invoice        =   $(x).data('invoice');
-            let status      =   @json(config('defaults.status'));
-            let priority    =   @json(config('defaults.priority'));
-            let html_data   =   `<div class="invoice-card">
-                                    <!-- HEADER -->
-                                    <div class="invoice-header">
-                                        <div>
-                                            <h5>${invoice.title}</h5>
-                                            <span style="color: #888;">Task Details</span>
-                                        </div>
-
-                                        <div class="badges">
-                                            <span class="badge ${status[invoice.status].class}">
-                                                <i class="${status[invoice.status].icon}"></i>
-                                                ${invoice.status.replaceAll('_',' ').toUpperCase()}
-                                            </span>
-
-                                            <span class="badge ${priority[invoice.priority].class}">
-                                                <i class="${priority[invoice.priority].icon}"></i>
-                                                ${invoice.priority.toUpperCase()}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div class="divider"></div>
-
-                                    <!-- GRID -->
-                                    <div class="invoice-grid">
-                                        <div>
-                                            <label>Project</label>
-                                            <p>${invoice.project?.title ?? '-'}</p>
-                                        </div>
-                                        <div>
-                                            <label>Due Date</label>
-                                            <p>${invoice.due_date ?? '-'}</p>
-                                        </div>
-                                        <div>
-                                            <label>Assigned By</label>
-                                            <p>${invoice.assigned?.name ?? '-'}</p>
-                                        </div>
-                                        <div>
-                                            <label>Assigned To</label>
-                                            <p>${invoice.assignee?.name ?? '-'}</p>
-                                        </div>
-                                        <div>
-                                            <label>Completed At</label>
-                                            <p>${invoice.completed_at ?? 'Not completed'}</p>
-                                        </div>
-                                    </div>
-
-                                    <!-- DESCRIPTION -->
-                                    <div class="description">
-                                        <label>Description</label>
-                                        <p>${invoice.description ?? '-'}</p>
-                                    </div>
-
-                                </div>`;
-            $("#invoice_view_data").html(html_data);
-            $("#view-invoice-modal").modal('show');
         }
     </script>
 @endsection
