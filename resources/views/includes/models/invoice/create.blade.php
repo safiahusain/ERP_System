@@ -1,8 +1,8 @@
 @php
-    $my_array   =   ['project', 'assigned_by', 'assigned_to', 'title', 'description', 'priority', 'status', 'due_date', 'completed_at'];
+    $my_array   =   ['project', 'client', 'amount', 'due_date'];
 @endphp
 <div class="modal fade" id="create-invoice-modal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-dialog modal-md" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">{{ __('Create Invoice') }}</h5>
@@ -15,38 +15,7 @@
                         @csrf
                         <div class="row">
 
-                            @include('includes.models.create-field', [
-                                'fields' => ['title', 'description'],
-                                'col' => 'col-md-6 col-12',
-                                'target' => 'create'
-                            ])
-
-                            <div class="col-md-6 col-12">
-                                <div class="form-group">
-                                    <label>{{ __('Priority') }}</label>
-                                    <select class='form-control select2' name='priority' style="width: 100%">
-                                        <option disabled selected>{{ __('Select Priority') }}</option>
-                                        <option value="low">{{ __('Low') }}</option>
-                                        <option value="high">{{ __('High') }}</option>
-                                    </select>
-                                    <small class="text-danger" id="create_priority"></small>
-                                </div>
-                            </div>
-                            <div class="col-md-6 col-12">
-                                <div class="form-group">
-                                    <label>{{ __('Status') }}</label>
-                                    <select class='form-control select2' name='status' style="width: 100%">
-                                        <option disabled selected>{{ __('Select Status') }}</option>
-                                        <option value="pending">{{ __('Pending') }}</option>
-                                        <option value="in_progress">{{ __('In Progress') }}</option>
-                                        <option value="testing">{{ __('Testing') }}</option>
-                                        <option value="completed">{{ __('Completed') }}</option>
-                                    </select>
-                                    <small class="text-danger" id="create_status"></small>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6 col-12">
+                            <div class="col-md-12 col-12">
                                 <div class="form-group">
                                     <label>{{ __('Project') }}</label>
                                     <select class='form-control select2' name='project' style="width: 100%">
@@ -59,20 +28,26 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-6 col-12">
+                            <div class="col-md-12 col-12">
                                 <div class="form-group">
-                                    <label>{{ __('Assign To') }}</label>
-                                    <select class='form-control select2' name='assigned_to' style="width: 100%">
-                                        <option disabled selected>{{ __('Select Team Member') }}</option>
-                                        @foreach ($team_members as $member)
-                                            <option value="{{ $member['id'] }}">{{ $member['name'] }}</option>
+                                    <label>{{ __('Client') }}</label>
+                                    <select class='form-control select2' name='client' style="width: 100%">
+                                        <option disabled selected>{{ __('Select Client') }}</option>
+                                        @foreach ($clients as $client)
+                                            <option value="{{ $client['id'] }}">{{ $client['email'] }}</option>
                                         @endforeach
                                     </select>
-                                    <small class="text-danger" id="create_assigned_to"></small>
+                                    <small class="text-danger" id="create_client"></small>
                                 </div>
                             </div>
 
-                            <div class="col-md-6 col-12">
+                            @include('includes.models.create-field', [
+                                'fields' => ['amount', 'description'],
+                                'col' => 'col-md-12 col-12',
+                                'target' => 'create'
+                            ])
+
+                            <div class="col-md-12 col-12">
                                 <div class="form-group">
                                    <label>Due Date</label>
                                     <div class="date-wrapper">

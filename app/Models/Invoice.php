@@ -2,20 +2,26 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Invoice extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
+        'client_id',
         'project_id',
         'invoice_number',
-        'amount',
+        'total',
+        'paid',
+        'due',
         'status',
-        'due_date'
+        'due_date',
+        'description'
     ];
+
+    public function client()
+    {
+        return $this->belongsTo(User::class, 'client_id');
+    }
 
     public function project()
     {
@@ -25,5 +31,19 @@ class Invoice extends Model
     public function payments()
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function updateStatus()
+    {
+        if ($this->paid >= $this->total) {
+            $this->status = 'paid';
+        } elseif ($this->paid > 0) {
+            $this->status = 'partial';
+        } else {
+            $this->status = 'unpaid';
+        }
+
+        $this->due = $this->total - $this->paid;
+        $this->save();
     }
 }

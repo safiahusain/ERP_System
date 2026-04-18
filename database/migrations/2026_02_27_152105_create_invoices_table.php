@@ -13,14 +13,19 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('invoices', function (Blueprint $table) {
+        Schema::create('invoices', function (Blueprint $table)
+        {
             $table->id();
-            $table->foreignId('project_id')->constrained()->onDelete('cascade');
-            $table->string('invoice_number')->nullable();
-            $table->double('amount')->nullable();
-            $table->string('description')->nullable();
-            $table->string('status')->nullable();
-            $table->timestamp('due_date')->nullable();
+            $table->foreignId('client_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('project_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->string('invoice_number')->unique();
+            $table->decimal('total', 10, 2);
+            $table->decimal('paid', 10, 2)->default(0);
+            $table->decimal('due', 10, 2);
+            $table->enum('status', ['paid', 'due'])->default('due');
+            $table->date('due_date')->nullable();
+            $table->text('description')->nullable();
+
             $table->timestamps();
         });
     }

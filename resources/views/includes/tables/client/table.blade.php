@@ -46,7 +46,22 @@
                 </tr>
             @endforeach
         @else
-
+            <tr>
+                <td colspan="3">
+                    <div class="text-center">
+                        <h5>
+                            {{ __('data.no_record_found') }}
+                        </h5>
+                        <hr>
+                    </div>
+                </td>
+            </tr>
         @endif
     </tbody>
 </table>
+@if ($clients->total() > 10)
+    <hr>
+    <div class="float-left">
+        {{$clients->withQueryString()->links('vendor.pagination')}}
+    </div>
+@endif

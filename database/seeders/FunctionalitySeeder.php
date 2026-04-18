@@ -3,36 +3,28 @@
 namespace Database\Seeders;
 
 use App\Models\functionality;
-use App\Models\Role;
-use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class FunctionalitySeeder extends Seeder
 {
-    /**
-    * Run the database seeds.
-    *
-    * @return void
-    */
     public function run()
     {
-        $func  = config('defaults.functionalities');
+        $func = config('rolesFunc.functionalities');
 
         if (!$func) return;
 
-        $parentMap = []; // yahan parent name => id store hoga
+        $parentMap = [];
 
         /**
-         * STEP 1: Insert Parents (jinki parent_id null hai)
+         * STEP 1: Insert ROOT MENUS (parent_id = null)
          */
         foreach ($func as $key => $value)
         {
             if ($value['parent_id'] === null)
             {
-                $existingFunc = functionality::where('tag', $value['tag'])->first();
+                $existing = functionality::where('tag', $value['tag'])->first();
 
-                if (!$existingFunc)
+                if (!$existing)
                 {
                     $created = functionality::create([
                         'name'      => $key,
@@ -41,46 +33,92 @@ class FunctionalitySeeder extends Seeder
                         'status'    => $value['status'],
                         'parent_id' => null,
                         'order'     => $value['order'] ?? 0,
-                        'data'      => json_encode($value['data']),
+                        'data'      => json_encode($value['data'] ?? []),
                     ]);
 
                     $parentMap[$key] = $created->id;
                 }
                 else
                 {
-                    $parentMap[$key] = $existingFunc->id;
+                    $existing->update([
+                        'name'   => $key,
+                        'target' => $value['target'],
+                        'status' => $value['status'],
+                        'order'  => $value['order'] ?? 0,
+                        'data'   => json_encode($value['data'] ?? []),
+                    ]);
+
+                    $parentMap[$key] = $existing->id;
                 }
             }
         }
 
         /**
-         * STEP 2: Insert Children
+         * STEP 2: HANDLE ALL LEVELS (menus + submenus + actions)
+         */
+        $pending = true;
+
+        while ($pending)
+        {
+            $pending = false;
+
+            foreach ($func as $key => $value)
+            {
+                // skip if already inserted
+                if (isset($parentMap[$key])) continue;
+
+                if ($value['parent_id'] !== null)
+                {
+                    $parentKey = str_replace('_id', '', $value['parent_id']);
+
+                    // agar parent abhi tak insert nahi hua → skip
+                    if (!isset($parentMap[$parentKey])) continue;
+
+                    $parentId = $parentMap[$parentKey];
+
+                    $existing = functionality::where('tag', $value['tag'])->first();
+
+                    if (!$existing)
+                    {
+                        $created = functionality::create([
+                            'name'      => $key,
+                            'tag'       => $value['tag'],
+                            'target'    => $value['target'],
+                            'status'    => $value['status'],
+                            'parent_id' => $parentId,
+                            'order'     => $value['order'] ?? 0,
+                            'data'      => json_encode($value['data'] ?? []),
+                        ]);
+
+                        $parentMap[$key] = $created->id;
+                        $pending = true;
+                    }
+                    else
+                    {
+                        $existing->update([
+                            'name'      => $key,
+                            'target'    => $value['target'],
+                            'status'    => $value['status'],
+                            'parent_id' => $parentId,
+                            'order'     => $value['order'] ?? 0,
+                            'data'      => json_encode($value['data'] ?? []),
+                        ]);
+
+                        $parentMap[$key] = $existing->id;
+                        $pending = true;
+                    }
+                }
+            }
+        }
+
+        /**
+         * OPTIONAL: DEBUG (agar koi entry insert nahi hui)
          */
         foreach ($func as $key => $value)
         {
-            if ($value['parent_id'] !== null)
+            if (!isset($parentMap[$key]))
             {
-                // "user_id" → "user"
-                $parentKey = str_replace('_id', '', $value['parent_id']);
-
-                $parentId = $parentMap[$parentKey] ?? null;
-
-                if (!$parentId) continue; // safety
-
-                $existingFunc = functionality::where('tag', $value['tag'])->first();
-
-                if (!$existingFunc)
-                {
-                    functionality::create([
-                        'name'      => $key,
-                        'tag'       => $value['tag'],
-                        'target'    => $value['target'],
-                        'status'    => $value['status'],
-                        'parent_id' => $parentId, // 🔥 actual ID
-                        'order'     => $value['order'] ?? 0,
-                        'data'      => json_encode($value['data']),
-                    ]);
-                }
+                \Log::warning("Functionality not inserted: " . $key);
             }
         }
     }

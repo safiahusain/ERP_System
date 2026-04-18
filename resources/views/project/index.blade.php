@@ -3,6 +3,20 @@
 @php
     $target = 'project';
 @endphp
+@section('css')
+    <style>
+        table {
+            table-layout: fixed; /* important */
+            width: 100%;
+        }
+
+        td, th {
+            word-wrap: break-word; /* old support */
+            word-break: break-word;
+            white-space: normal;  /* ensure wrap allowed */
+            max-width: 200px;     /* adjust per column */
+        }
+    </style>
 @section('content')
     <div class="col-lg-12 grid-margin stretch-card">
         <div class="card">

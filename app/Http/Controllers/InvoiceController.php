@@ -6,8 +6,10 @@ use App\Helper\AuthHelper;
 use App\Helper\NotificationHelper;
 use App\Models\Invoice;
 use App\Models\Project;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\In;
 
 class InvoiceController extends Controller
 {
@@ -36,19 +38,22 @@ class InvoiceController extends Controller
         {
             if ($request->ajax())
             {
-                $Invoices  =   Invoice::with('project', 'assignee', 'assigned')->latest()->paginate(10);
+                $invoices  =   Invoice::latest()->paginate(10);
 
-                return view('includes.tables.Invoice.table', compact(
-                    'Invoices',
+                return view('includes.tables.invoice.table', compact(
+                    'invoices',
                     'auth',
                 ));
             }
             else
             {
-                $projects    =   Project::latest()->paginate(10);
-                return view('Invoice.index',compact(
+                $clients    =   User::where('role_tag', 'client')->get();
+                $projects   =   Project::get();
+
+                return view('invoice.index',compact(
                     'auth',
                     'projects',
+                    'clients'
                 ));
             }
         }
@@ -63,7 +68,6 @@ class InvoiceController extends Controller
     public function create(Request $request)
     {
         $auth           =   AuthHelper::checkAuth();
-        $user           =   $auth->user;
         $message        =   trans('messages.un_authorized');
         $type           =   'info';
         $code           =   401;
@@ -73,27 +77,32 @@ class InvoiceController extends Controller
         if ($allowed || $auth->role == "super_admin")
         {
             $rules = [
-                'project'       =>  ['required', 'exists:projects,id'],
-                'amount'        =>  ['required', 'numeric', 'min:0'],       // amount should be a positive number
-                'description'   =>  ['nullable', 'string', 'max:255'],      // description optional, string max 255
-                'status'        =>  ['required', Rule::in(['unpaid','partial','paid'])],  // allowed statuses
-                'due_date'      =>  ['required', 'date', 'after_or_equal:today'],       // due_date must be today or future
+                'project'   =>  ['required', 'exists:projects,id'],
+                'client'    =>  ['required', 'exists:users,id',
+                                    Rule::exists('users', 'id')->where(function ($q) {
+                                        $q->where('role_tag', 'client'); // sirf team allowed
+                                    })
+                                ],
+                'amount'    =>  'required|numeric'
             ];
 
             $request->validate($rules);
 
             if(!in_array($auth->role, ["client", "team"]))
             {
-                $Invoice_create  =   [
-                    'project_id'    =>  $request->project ?? null,
-                    'invoice_number'=>  $auth->user->id,
-                    'amount'        =>  $request->assigned_to ,
-                    'description'   =>  $request->title,
-                    'status'        =>  $request->description,
+                $invoice_create  =   [
+                    'client_id'     =>  $request->client,
+                    'project_id'    =>  $request->project,
+                    'invoice_number'=>  'INV-' . rand(1000,9999),
+                    'total'         =>  $request->amount,
+                    'paid'          =>  0,
+                    'due'           =>  $request->amount,
+                    'status'        =>  'due',
                     'due_date'      =>  $request->due_date,
+                    'description'   =>  $request->description
                 ];
 
-                $created    =   Invoice::create($Invoice_create);
+                $created    =   Invoice::create($invoice_create);
                 $message    =   trans('Something went wrong while creating invoice');
                 $type       =   'error';
                 $code       =   500;
@@ -126,39 +135,34 @@ class InvoiceController extends Controller
 
         if ($allowed || $auth->role == "super_admin")
         {
-            $Invoice       =   Invoice::find($id);
+            $invoice    =   Invoice::find($id);
             $message    =   trans('Invoice not found');
             $type       =   'info';
             $code       =   404;
 
-            if($Invoice)
+            if($invoice)
             {
                 $rules          =   [
-                    'project'       =>  ['required', 'exists:projects,id'],
-                    'assigned_to'   =>  ['required', 'exists:users,id',
-                                            Rule::exists('users', 'id')->where(function ($q) {
-                                                $q->where('role_tag', 'team'); // sirf team allowed
-                                            })
-                                        ],
-                    'title'         =>  ['required', 'string', 'max:255'],
-                    'description'   =>  ['required', 'string', 'max:255'],
-                    'priority'      =>  ['required', Rule::in(['low', 'high'])],
-                    'status'        =>  ['required', Rule::in(['pending', 'in_progress', 'testing', 'completed'])],
-                    'due_date'      =>  ['required', 'date'],
+                    'project'   =>  ['required', 'exists:projects,id'],
+                    'client'    =>  ['required', 'exists:users,id',
+                                        Rule::exists('users', 'id')->where(function ($q) {
+                                            $q->where('role_tag', 'client'); // sirf team allowed
+                                        })
+                                    ],
+                    'amount'    =>  'required|numeric'
                 ];
 
                 $request->validate($rules);
 
-                $Invoice_updated   =   [
-                    'project_id'    =>  $request->project ?? null,
-                    'invoice_number'=>  $auth->user->id,
-                    'amount'        =>  $request->assigned_to ,
-                    'description'   =>  $request->title,
-                    'status'        =>  $request->description,
-                    'due_date'      =>  $request->due_date,
+                $invoice_updated   =   [
+                    'client_id' => $request->client,
+                    'project_id' => $request->project,
+                    'total' => $request->amount,
+                    'due_date' => $request->due_date,
+                    'description' => $request->description
                 ];
 
-                $updated    =   $Invoice->update($Invoice_updated);
+                $updated    =   $invoice->update($invoice_updated);
                 $message    =   trans('Something went wrong while updating invoice');
                 $type       =   'error';
                 $code       =   500;
@@ -169,6 +173,53 @@ class InvoiceController extends Controller
                     $type       =   'success';
                     $code       =   200;
                     $success    =   true;
+                }
+            }
+        }
+
+        return response()->json([
+            'success'   =>  $success,
+            'type'      =>  $type,
+            'message'   =>  $message,
+        ],$code);
+    }
+
+    public function delete(Request $request, $id)
+    {
+        $auth       =   AuthHelper::checkAuth();
+        $message    =   trans('messages.un_authorized');
+        $type       =   'info';
+        $code       =   401;
+        $success    =   false;
+        $allowed    =   array_key_exists("INVOICEDLT",$auth->func);
+
+        if ($allowed || $auth->role == "super_admin")
+        {
+            $invoice    =   Invoice::find($id);
+            $message    =   trans('Invoice not found');
+            $type       =   'info';
+            $code       =   404;
+
+            if($invoice)
+            {
+                $message    =   trans('You are not allowed to delete this invoice as it has payments');
+                $type       =   'info';
+                $code       =   401;
+
+                if($invoice->payments()->count() == 0)
+                {
+                    $deleted    =   $invoice->delete();
+                    $message    =   trans('Something went wrong while deleting invoice');
+                    $type       =   'error';
+                    $code       =   500;
+
+                    if ($deleted)
+                    {
+                        $message    =   trans('Invoice deleted Successfully');
+                        $type       =   'success';
+                        $code       =   200;
+                        $success    =   true;
+                    }
                 }
             }
         }

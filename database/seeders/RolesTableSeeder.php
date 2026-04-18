@@ -15,7 +15,7 @@ class RolesTableSeeder extends Seeder
     */
     public function run()
     {
-        foreach (config('defaults.roles') as $key => $value)
+        foreach (config('rolesFunc.roles') as $key => $value)
         {
             $found  =   Role::where([
                 'tag'      =>  $key,

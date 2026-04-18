@@ -526,36 +526,34 @@
             $('#sidebar .menu-toggle').attr('aria-expanded', 'false');
 
             // 👉 AUTO ACTIVE DETECTION
-            $('#sidebar .nav-link').each(function () {
+            $('#sidebar .nav-link').each(function ()
+            {
+                var link = $(this).attr('href');
 
-            var link = $(this).attr('href');
+                if (!link || link === '#') return;
 
-            if (!link || link === '#') return;
+                // full URL → pathname
+                var linkPath = new URL(link, window.location.origin).pathname;
 
-            // full URL → pathname
-            var linkPath = new URL(link, window.location.origin).pathname;
+                if (current === linkPath)
+                {
+                    $('#sidebar .nav-link').removeClass('active');
+                    $('#sidebar .nav-item').removeClass('active');
 
-            if (current === linkPath) {
+                    $(this).addClass('active');
+                    $(this).parent('.nav-item').addClass('active');
 
-                $('#sidebar .nav-link').removeClass('active');
-                $('#sidebar .nav-item').removeClass('active');
+                    // 👉 OPEN PARENT MENUS
+                    var parents = $(this).parents('.collapse');
 
-                $(this).addClass('active');
-                $(this).parent('.nav-item').addClass('active');
-
-                // 👉 OPEN PARENT MENUS
-                var parents = $(this).parents('.collapse');
-
-                parents.each(function () {
-                $(this).addClass('show');
-                $(this).prev('.menu-toggle').attr('aria-expanded', 'true');
-                $(this).parent('.nav-item').addClass('active');
-                });
-
-            }
-
+                    parents.each(function ()
+                    {
+                        $(this).addClass('show');
+                        $(this).prev('.menu-toggle').attr('aria-expanded', 'true');
+                        $(this).parent('.nav-item').addClass('active');
+                    });
+                }
             });
-
         });
 
         function validate_fields(my_array,type,obj)

@@ -6,6 +6,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectRoleController;
 use App\Http\Controllers\TaskController;
@@ -80,4 +81,11 @@ Route::get('/invoice/index', [InvoiceController::class, 'index'])->name('invoice
 Route::post('/invoice/create', [InvoiceController::class, 'create'])->name('invoice-create');
 Route::post('/invoice/update/{id}', [InvoiceController::class, 'update'])->name('invoice-update');
 Route::get('/invoice/delete/{id}', [InvoiceController::class, 'delete'])->name('invoice-delete');
+
+// Payment Routes Start
+
+Route::get('/payment/index/{id}', [PaymentController::class, 'index'])->name('payment-index');
+Route::post('/payment/create', [PaymentController::class, 'create'])->name('payment-create');
+Route::post('/payment/update/{id}', [PaymentController::class, 'update'])->name('payment-update');
+Route::get('/payment/delete/{id}', [PaymentController::class, 'delete'])->name('payment-delete');
 

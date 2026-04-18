@@ -15,10 +15,11 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('invoice_id')->constrained()->onDelete('cascade');
-            $table->double('amount')->nullable();
-            $table->string('payment_method')->nullable();
-            $table->timestamp('payment_date')->nullable();
+            $table->foreignId('invoice_id')->constrained()->cascadeOnDelete();
+            $table->decimal('amount', 10, 2);
+            $table->string('method');
+            $table->string('reference')->nullable();
+            $table->date('date');
             $table->timestamps();
         });
     }

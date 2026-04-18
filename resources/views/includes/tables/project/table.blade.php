@@ -6,8 +6,6 @@
             <th> {{__("Title")}} </th>
             <th> {{__("Description")}} </th>
             <th> {{__("Status")}} </th>
-            {{-- <th> {{__("Start Data")}} </th>
-            <th> {{__("End Data")}} </th> --}}
             <th> {{__("Action")}} </th>
         </tr>
     </thead>
@@ -21,10 +19,10 @@
                     <td> {{ $project->client->email ??  "" }} </td>
                     <td> {{ $project->manager->email ??  "" }} </td>
                     <td> {{ ucwords($project->title) ??  "" }} </td>
-                    <td> {{ $project->description ??  "" }} </td>
+                    <td style="max-width: 200px; overflow-wrap: break-word; word-break: break-word; white-space: normal;">
+                        {{ $project->description ?? "" }}
+                    </td>
                     <td> {{ ucwords($project->status) ??  "" }} </td>
-                    {{-- <td> {{ $project->start_date ??  "" }} </td>
-                    <td> {{ $project->end_date ??  "" }} </td> --}}
                     <td>
                         @if (array_key_exists("PROJECTVIEW",$auth->func))
                             <a href="javascript:void(0)" data-bs-toggle="tooltip" data-id="{{$project->id}}" onclick="get_data_to_view(this)" title="{{ __('view') }}">
@@ -45,7 +43,22 @@
                 </tr>
             @endforeach
         @else
-
+            <tr>
+                <td colspan="3">
+                    <div class="text-center">
+                        <h5>
+                            {{ __('data.no_record_found') }}
+                        </h5>
+                        <hr>
+                    </div>
+                </td>
+            </tr>
         @endif
     </tbody>
 </table>
+@if ($projects->total() > 10)
+    <hr>
+    <div class="float-left">
+        {{$projects->withQueryString()->links('vendor.pagination')}}
+    </div>
+@endif
